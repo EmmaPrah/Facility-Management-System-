@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}Archived Weekly Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h2>Archived Weekly Reports</h2>
+            <p class="lead">List of automatically generated weekly activity reports.</p>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <ul class="nav nav-pills justify-content-center" id="reportTypeTabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" data-period="all">All</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-period="daily">Daily</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-period="weekly">Weekly</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-period="monthly">Monthly</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-period="yearly">Yearly</a>
+            </li>
+        </ul>
+    </div>
+    {% if reports %}
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Generated At</th>
+                        <th>Report Period</th>
+                        <th>Status</th>
+                        <th>File Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                        {# Defaulting to 'weekly' for all reports; update to report.period_type if available #}
+                        <tr data-period-type="{{ report.period_type if report.period_type is defined else 'weekly' }}">
+                            <td>{{ report.generated_at_formatted }}</td>
+                            <td>{{ report.period_start_date }} to {{ report.period_end_date }}</td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if report.status == 'success' else 'danger' }}">
+                                    {{ report.status | capitalize }}
+                                </span>
+                                {% if report.status == 'failed' and report.error_message %}
+                                    <small class="text-muted d-block">{{ report.error_message | truncate(100) }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ report.file_path.split('/')[-1].split('\\')[-1] }}</td> {# Display just the filename #}
+                            <td>
+                                {% if report.status == 'success' %}
+                                    <a href="{{ url_for('view_archived_report', report_id=report.id) }}" class="btn btn-sm btn-info" target="_blank">
+                                        <span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">visibility</span> View
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-secondary" disabled>
+                                        <span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">visibility_off</span> View
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            No archived reports found yet. The first report will be generated automatically on Saturday at 7 PM.
+        </div>
+    {% endif %}
+
+    <div class="text-center mt-4 mb-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">arrow_back</span>Back to Dashboard</a>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('#reportTypeTabs .nav-link');
+    const rows = document.querySelectorAll('tr[data-period-type]');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const period = this.getAttribute('data-period');
+            rows.forEach(row => {
+                if (period === 'all' || row.getAttribute('data-period-type') === period) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

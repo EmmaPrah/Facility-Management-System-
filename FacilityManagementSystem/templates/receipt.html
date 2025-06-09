@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Expenditure Receipt - ID {{ expenditure.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Expenditure Receipt</h4>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Receipt ID:</strong> E-{{ (expenditure.id | string).zfill(5) }}<br>
+                    <strong>Date:</strong> {{ expenditure.expenditure_date_formatted | default('N/A') }}
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h4>Total Amount: ${{ "%.2f"|format(expenditure.amount) if expenditure.amount is not none else '0.00' }}</h4>
+                </div>
+            </div>
+
+            <hr>
+
+            <h5>Details:</h5>
+            <table class="table table-sm table-bordered">
+                <tbody>
+                    <tr>
+                        <th style="width: 30%;">Category:</th>
+                        <td>{{ expenditure.category | default('N/A') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Item/Description:</th>
+                        <td>{{ expenditure.description | default('N/A') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Vendor:</th>
+                        <td>{{ expenditure.vendor | default('N/A') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Facility:</th>
+                        <td>{{ expenditure.facility_name | default('N/A') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Buyer:</th>
+                        <td>{{ expenditure.buyer | default('N/A') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Means of Payment:</th>
+                        <td>{{ expenditure.means_of_payment | default('N/A') }}</td>
+                    </tr>
+                    {% if expenditure.receipt_reference %}
+                    <tr>
+                        <th>Receipt Reference:</th>
+                        <td>{{ expenditure.receipt_reference }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if expenditure.notes %}
+                    <tr>
+                        <th>Notes:</th>
+                        <td>{{ expenditure.notes }}</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <div class="mt-4 text-center">
+                <p class="text-muted">Thank you for your business.</p>
+                <button class="btn btn-secondary" onclick="window.print();">
+                    <span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">print</span> Print Receipt
+                </button>
+                <a href="{{ url_for('expenditures_page') }}" class="btn btn-primary">
+                    <span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">arrow_back</span> Back to Expenditures
+                </a>
+            </div>
+        </div>
+        <div class="card-footer text-muted text-center">
+            Generated on: {{ current_timestamp.strftime("%B %d, %Y %H:%M:%S") if current_timestamp else 'N/A' }}
+        </div>
+    </div>
+</div>
+{% endblock %}

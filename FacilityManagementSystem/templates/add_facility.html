@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Facility{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Add New Facility</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_facility') }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Facility Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="Available" selected>Available</option>
+                            <option value="Occupied">Occupied</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary me-2"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">cancel</span>Cancel</a>
+                        <button type="submit" class="btn btn-primary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">add_circle_outline</span>Add Facility</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

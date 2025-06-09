@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Expenditure{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Expenditure</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('edit_expenditure_page', expenditure_id=expenditure.id) }}">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="expenditure_date" class="form-label">Expenditure Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="expenditure_date" name="expenditure_date" value="{{ form_data.expenditure_date if form_data else expenditure.expenditure_date }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                <select class="form-select" id="category" name="category" required>
+                    <option value="" {% if not (form_data.category if form_data else expenditure.category) %}selected{% endif %} disabled>-- Select Category --</option>
+                    {% set selected_category = form_data.category if form_data else expenditure.category %}
+                    {% for cat_name in expenditure_categories %}
+                        <option value="{{ cat_name }}" {% if selected_category == cat_name %}selected{% endif %}>{{ cat_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="item" class="form-label">Item <span class="text-danger">*</span></label>
+            <select class="form-select" id="item" name="item" required>
+                <option value="" selected disabled>-- Select Category First --</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="custom_description_wrapper" style="display: none;">
+            <label for="description" class="form-label">Custom Description <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="description" name="description" rows="3">{{ form_data.description if form_data else expenditure.description }}</textarea>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" value="{{ form_data.amount if form_data else ('%.2f'|format(expenditure.amount)) }}" placeholder="0.00" required>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="vendor" class="form-label">Vendor</label>
+                <input type="text" class="form-control" id="vendor" name="vendor" value="{{ form_data.vendor if form_data else (expenditure.vendor or '') }}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="facility_id" class="form-label">Facility (Optional)</label>
+                <select class="form-select" id="facility_id" name="facility_id">
+                    <option value="">-- Select Facility --</option>
+                    {% set selected_facility_id = form_data.facility_id if form_data else (expenditure.facility_id | string if expenditure.facility_id is not none else '') %}
+                    {% for facility in facilities %}
+                        <option value="{{ facility.id }}" {% if selected_facility_id == facility.id|string %}selected{% endif %}>{{ facility.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="buyer" class="form-label">Buyer</label>
+                <input type="text" class="form-control" id="buyer" name="buyer" value="{{ form_data.buyer if form_data else (expenditure.buyer or '') }}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="receipt_reference" class="form-label">Receipt Reference</label>
+                <input type="text" class="form-control" id="receipt_reference" name="receipt_reference" value="{{ form_data.receipt_reference if form_data else (expenditure.receipt_reference or '') }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="means_of_payment" class="form-label">Means of Payment</label>
+                <select class="form-select" id="means_of_payment" name="means_of_payment">
+                    <option value="">-- Select Means of Payment --</option>
+                    {% set selected_mop = form_data.means_of_payment if form_data else (expenditure.means_of_payment or '') %}
+                    {% for option in payment_means_options %}
+                        <option value="{{ option }}" {% if selected_mop == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3">{{ form_data.notes if form_data else (expenditure.notes or '') }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">save</span>Update Expenditure</button>
+        <a href="{{ url_for('expenditures_page') }}" class="btn btn-secondary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">cancel</span>Cancel</a>
+    </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category');
+    const itemSelect = document.getElementById('item');
+    const customDescriptionWrapper = document.getElementById('custom_description_wrapper');
+    const descriptionTextarea = document.getElementById('description');
+    const initialDescription = descriptionTextarea.value.trim(); // Store the initial description from the server
+
+    const expenditureItemsData = {{ expenditure_items_data | tojson | safe }};
+    const currentCategory = "{{ expenditure.category }}";
+    const currentDescriptionFromDB = "{{ (form_data.description if form_data else expenditure.description) | e }}"; // Escaped, prioritize form_data
+
+    function populateItems(selectedCategory) {
+        itemSelect.innerHTML = '<option value="" selected disabled>-- Select Item --</option>';
+        let itemFound = false;
+        if (selectedCategory && expenditureItemsData[selectedCategory]) {
+            expenditureItemsData[selectedCategory].forEach(function(itemText) {
+                const option = new Option(itemText, itemText);
+                itemSelect.add(option);
+                if (itemText === currentDescriptionFromDB) {
+                    itemSelect.value = itemText;
+                    itemFound = true;
+                }
+            });
+            itemSelect.add(new Option('Other...', 'Other'));
+            itemSelect.disabled = false;
+        } else {
+            itemSelect.disabled = true;
+        }
+        return itemFound;
+    }
+
+    categorySelect.addEventListener('change', function() {
+        const selectedCategory = this.value;
+        const itemWasPreSelected = populateItems(selectedCategory);
+        
+        if (itemSelect.value === 'Other' || (!itemWasPreSelected && selectedCategory === currentCategory)) {
+            // If 'Other' is auto-selected OR if the item wasn't found in the new category list (and it's the original category)
+            // then show custom description with original DB value.
+            itemSelect.value = 'Other'; // Ensure 'Other' is selected if item not in list
+            customDescriptionWrapper.style.display = 'block';
+            descriptionTextarea.value = currentDescriptionFromDB; // Keep original description if it was custom
+            descriptionTextarea.required = true;
+        } else if (itemSelect.value && itemSelect.value !== 'Other') {
+            customDescriptionWrapper.style.display = 'none';
+            descriptionTextarea.value = itemSelect.value;
+            descriptionTextarea.required = false;
+        } else {
+            // Default state if no item selected or category cleared
+            customDescriptionWrapper.style.display = 'none';
+            descriptionTextarea.value = ''; // Clear description if no item is selected
+            descriptionTextarea.required = false;
+        }
+    });
+
+    itemSelect.addEventListener('change', function() {
+        if (this.value === 'Other') {
+            customDescriptionWrapper.style.display = 'block';
+            descriptionTextarea.value = ''; // Clear for new custom input, or retain if it was already custom
+            descriptionTextarea.required = true;
+            descriptionTextarea.focus();
+        } else {
+            customDescriptionWrapper.style.display = 'none';
+            descriptionTextarea.value = this.value;
+            descriptionTextarea.required = false;
+        }
+    });
+
+    // Initial population and selection
+    if (currentCategory) {
+        categorySelect.value = currentCategory;
+        const itemWasFound = populateItems(currentCategory);
+        if (!itemWasFound) {
+            itemSelect.value = 'Other';
+        }
+    } else {
+        // No initial category, disable items
+        itemSelect.disabled = true;
+    }
+    // Trigger change to set initial state of description field based on item selection
+    itemSelect.dispatchEvent(new Event('change')); 
+    // If 'Other' was selected, ensure the original description is in the textarea
+    if (itemSelect.value === 'Other') {
+        descriptionTextarea.value = currentDescriptionFromDB;
+    }
+
+
+    const form = categorySelect.closest('form');
+    form.addEventListener('submit', function(event) {
+        if (itemSelect.value === 'Other') {
+            if (!descriptionTextarea.value.trim()) {
+                // HTML5 'required' should handle this, but as a fallback:
+                // alert('Custom description cannot be empty when "Other" is selected.');
+                // event.preventDefault(); 
+            }
+        } else if (itemSelect.value) {
+            descriptionTextarea.value = itemSelect.value;
+        } else {
+            // No item selected, and not 'Other'. This case should be prevented by 'required' on itemSelect.
+            // If a category is selected, an item (or 'Other') must be selected.
+        }
+    });
+});
+</script>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Expenditure{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add New Expenditure</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('add_expenditure_page') }}">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="expenditure_date" class="form-label">Expenditure Date <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="expenditure_date" name="expenditure_date" value="{{ form_data.expenditure_date if form_data else '' }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                <select class="form-select" id="category" name="category" required>
+                    <option value="" {% if not form_data or not form_data.category %}selected{% endif %} disabled>-- Select Category --</option>
+                    {% for cat_name in expenditure_categories %}
+                        <option value="{{ cat_name }}" {% if form_data and form_data.category == cat_name %}selected{% endif %}>{{ cat_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="item" class="form-label">Item <span class="text-danger">*</span></label>
+            <select class="form-select" id="item" name="item" required>
+                <option value="" selected disabled>-- Select Category First --</option>
+            </select>
+        </div>
+
+        <div class="mb-3" id="custom_description_wrapper" style="display: none;">
+            <label for="description" class="form-label">Custom Description <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="amount" class="form-label">Amount <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text">$</span>
+                    <input type="number" class="form-control" id="amount" name="amount" step="0.01" placeholder="0.00" value="{{ form_data.amount if form_data else '' }}" required>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="vendor" class="form-label">Vendor</label>
+                <input type="text" class="form-control" id="vendor" name="vendor" value="{{ form_data.vendor if form_data else '' }}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="facility_id" class="form-label">Facility (Optional)</label>
+                <select class="form-select" id="facility_id" name="facility_id">
+                    <option value="">-- Select Facility --</option>
+                    {% for facility in facilities %}
+                        <option value="{{ facility.id }}" {% if form_data and form_data.facility_id == facility.id|string %}selected{% endif %}>{{ facility.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="buyer" class="form-label">Buyer</label>
+                <input type="text" class="form-control" id="buyer" name="buyer" value="{{ form_data.buyer if form_data else '' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="means_of_payment" class="form-label">Means of Payment</label>
+                <select class="form-select" id="means_of_payment" name="means_of_payment">
+                    <option value="">-- Select Means of Payment --</option>
+                    {% for option in payment_means_options %}
+                        <option value="{{ option }}" {% if form_data and form_data.means_of_payment == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="receipt_reference" class="form-label">Receipt Reference</label>
+                <input type="text" class="form-control" id="receipt_reference" name="receipt_reference" value="{{ form_data.receipt_reference if form_data else '' }}">
+            </div>
+            <div class="col-md-6 mb-3">
+                <!-- This column is intentionally left blank for now, can be used for another field or removed -->
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3">{{ form_data.notes if form_data else '' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">save</span>Submit Expenditure
+        </button>
+        <a href="{{ url_for('expenditures_page') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('category');
+    const itemSelect = document.getElementById('item');
+    const customDescriptionWrapper = document.getElementById('custom_description_wrapper');
+    const descriptionTextarea = document.getElementById('description');
+
+    // This will be populated by Flask/Jinja
+    const expenditureItemsData = {{ expenditure_items_data | tojson | safe }};
+
+    categorySelect.addEventListener('change', function() {
+        const selectedCategory = this.value;
+        itemSelect.innerHTML = '<option value="" selected disabled>-- Select Item --</option>'; // Reset items
+        customDescriptionWrapper.style.display = 'none';
+        descriptionTextarea.value = '';
+        descriptionTextarea.required = false;
+
+        if (selectedCategory && expenditureItemsData[selectedCategory]) {
+            expenditureItemsData[selectedCategory].forEach(function(itemText) {
+                const option = new Option(itemText, itemText);
+                itemSelect.add(option);
+            });
+            itemSelect.add(new Option('Other...', 'Other'));
+            itemSelect.disabled = false;
+        } else {
+            itemSelect.disabled = true;
+        }
+    });
+
+    itemSelect.addEventListener('change', function() {
+        if (this.value === 'Other') {
+            customDescriptionWrapper.style.display = 'block';
+            descriptionTextarea.required = true;
+            descriptionTextarea.value = ''; 
+            descriptionTextarea.focus();
+        } else {
+            customDescriptionWrapper.style.display = 'none';
+            descriptionTextarea.required = false; 
+            // The actual description field for the DB will be 'description'. 
+            // We set its value here if a predefined item is chosen.
+            descriptionTextarea.value = this.value; 
+        }
+    });
+
+    // Trigger change on category select if a category is already selected on page load
+    // (e.g. form re-submission with errors)
+    if (categorySelect.value) {
+        categorySelect.dispatchEvent(new Event('change'));
+        // Attempt to re-select the previously selected item if available
+        // This assumes 'old_item_value' is passed to the template on form error re-render
+        const oldItemValue = descriptionTextarea.dataset.oldValue || ''; 
+        if(oldItemValue && itemSelect.options.namedItem(oldItemValue)) {
+             itemSelect.value = oldItemValue;
+        } else if (oldItemValue === 'Other') {
+            itemSelect.value = 'Other';
+        }
+        itemSelect.dispatchEvent(new Event('change'));
+    }
+
+    const form = categorySelect.closest('form');
+    form.addEventListener('submit', function(event) {
+        if (itemSelect.value === 'Other') {
+            // If 'Other' is selected, the descriptionTextarea is already required by the 'change' event listener.
+            // No specific action needed here as HTML5 validation should handle it.
+            if (!descriptionTextarea.value.trim()) {
+                // Optional: could add a custom alert if browser validation is bypassed or for better UX
+                // event.preventDefault(); // Prevent submission if custom description is empty
+            }
+        } else if (itemSelect.value === '' && categorySelect.value !== '') {
+            // A category is selected, but no item is selected from the item dropdown (and not 'Other')
+            // This state should ideally be prevented by the 'required' attribute on itemSelect or handled by UI prompts.
+            // alert('Please select an item or choose "Other..." to provide a custom description.');
+            // event.preventDefault();
+        } else {
+            // An item from the list is selected. Ensure the descriptionTextarea (which is the field submitted to DB)
+            // has the value of the selected item.
+            descriptionTextarea.value = itemSelect.value;
+        }
+        // If categorySelect.value is '', the 'required' attribute on categorySelect should prevent submission.
+    });
+
+     // Store the initial description value (if any, for edit page or error re-render) to help re-select item
+    descriptionTextarea.dataset.oldValue = descriptionTextarea.value;
+
+});
+</script>
+</div>
+{% endblock %}

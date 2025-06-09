@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Cleaning Checklist{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <h2>Cleaning Checklist</h2>
+        </div>
+        <div class="col-md-3">
+            <label for="facilitySelect" class="form-label">Select Facility:</label>
+            <select id="facilitySelect" class="form-select">
+                {% if facilities %}
+                    {% for facility in facilities %}
+                        <option value="{{ facility.id }}">{{ facility.name }}</option>
+                    {% endfor %}
+                {% else %}
+                    <option value="">No facilities available</option>
+                {% endif %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="checklistDate" class="form-label">Select Date:</label>
+            <input type="date" id="checklistDate" class="form-control" value="{{ today_date }}">
+        </div>
+    </div>
+
+    {% if areas_with_tasks %}
+        {% for area in areas_with_tasks %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ area.name }}</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for task in area.tasks %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ task.description }}</span>
+                            <div>
+                                <input type="checkbox" class="form-check-input me-2" id="task-{{ task.id }}" data-task-id="{{ task.id }}">
+                                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#notes-{{ task.id }}" aria-expanded="false" aria-controls="notes-{{ task.id }}">
+                                    <span class="material-icons-outlined align-middle" style="font-size: 1rem;">notes</span>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="list-group-item collapse" id="notes-{{ task.id }}">
+                            <textarea class="form-control form-control-sm" placeholder="Add notes..."></textarea>
+                        </li>
+                    {% else %}
+                        <li class="list-group-item">No tasks defined for this area.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>No cleaning areas or tasks defined yet.</p>
+    {% endif %}
+
+    <div class="text-end mt-4">
+        <button class="btn btn-primary" id="saveChecklistButton"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">save</span>Save Checklist</button>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checklistDateInput = document.getElementById('checklistDate');
+    const facilitySelect = document.getElementById('facilitySelect');
+
+    function resetChecklistForm() {
+        document.querySelectorAll('input[type="checkbox"][data-task-id]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        document.querySelectorAll('textarea.form-control-sm').forEach(textarea => {
+            textarea.value = '';
+        });
+         // Ensure notes sections are collapsed
+        document.querySelectorAll('.collapse.show').forEach(openNote => {
+            new bootstrap.Collapse(openNote, { toggle: false }).hide();
+        });
+    }
+
+    function loadChecklistData() {
+        const facilityId = facilitySelect.value;
+        const date = checklistDateInput.value;
+
+        resetChecklistForm(); // Reset form before loading new data
+
+        if (!facilityId || !date) {
+            // console.log('Facility ID or Date not selected, skipping load.');
+            return;
+        }
+
+        // console.log(`Loading data for facility: ${facilityId}, date: ${date}`);
+        fetch(`/api/cleaning_log_entries?facility_id=${facilityId}&date=${date}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.entries) {
+                    // console.log('Received entries:', data.entries);
+                    Object.keys(data.entries).forEach(taskId => {
+                        const entry = data.entries[taskId];
+                        const checkbox = document.getElementById(`task-${taskId}`);
+                        const notesTextarea = document.querySelector(`#notes-${taskId} textarea`);
+
+                        if (checkbox) {
+                            checkbox.checked = entry.status === 'Completed';
+                        }
+                        if (notesTextarea) {
+                            notesTextarea.value = entry.notes || '';
+                            // If there are notes, expand the notes section
+                            if (entry.notes) {
+                                const notesCollapseElement = document.getElementById(`notes-${taskId}`);
+                                if (notesCollapseElement && !notesCollapseElement.classList.contains('show')) {
+                                    new bootstrap.Collapse(notesCollapseElement, { toggle: false }).show();
+                                }
+                            }
+                        }
+                    });
+                } else if (!data.success) {
+                    console.error('Error loading checklist data:', data.message);
+                    // Optionally, show a user-friendly error message
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching checklist data:', error);
+                // Optionally, show a user-friendly error message
+            });
+    }
+
+    checklistDateInput.addEventListener('change', loadChecklistData);
+    facilitySelect.addEventListener('change', loadChecklistData);
+
+    document.getElementById('saveChecklistButton').addEventListener('click', function() {
+        const facilityId = facilitySelect.value;
+        const date = checklistDateInput.value;
+        const logEntries = [];
+
+        document.querySelectorAll('input[type="checkbox"][data-task-id]').forEach(checkbox => {
+            const taskId = checkbox.dataset.taskId;
+            const notesTextarea = document.querySelector(`#notes-${taskId} textarea`);
+            logEntries.push({
+                task_id: taskId,
+                status: checkbox.checked ? 'Completed' : 'Pending',
+                notes: notesTextarea ? notesTextarea.value : ''
+            });
+        });
+
+        if (!facilityId) {
+            alert('Please select a facility.');
+            return;
+        }
+        if (!date) {
+            alert('Please select a date.');
+            return;
+        }
+
+        // console.log('Saving checklist:', { facility_id: facilityId, date: date, entries: logEntries });
+        // Make API call to save logEntries
+        fetch('/api/cleaning_log', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ facility_id: facilityId, date: date, entries: logEntries })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Checklist saved successfully!');
+            } else {
+                alert('Error saving checklist: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error saving checklist:', error);
+            alert('An error occurred while saving the checklist.');
+        });
+    });
+
+    // Initial load
+    if (facilitySelect.options.length > 0 && facilitySelect.value) {
+        loadChecklistData();
+    }
+});
+</script>
+{% endblock %}

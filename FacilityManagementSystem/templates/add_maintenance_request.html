@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Add Maintenance Request{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Add New Maintenance Request</h2>
+
+    <form method="POST" action="{{ url_for('add_maintenance_request_page') }}">
+        <div class="mb-3">
+            <label for="facility_id" class="form-label">Facility</label>
+            <select class="form-select" id="facility_id" name="facility_id" required>
+                <option value="" disabled selected>Select a facility</option>
+                {% if facilities %}
+                    {% for facility in facilities %}
+                        <option value="{{ facility.id }}">{{ facility.name }}</option>
+                    {% endfor %}
+                {% else %}
+                    <option value="" disabled>No facilities available</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="issue_description" class="form-label">Issue Description</label>
+            <textarea class="form-control" id="issue_description" name="issue_description" rows="3" required></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="priority" class="form-label">Priority</label>
+            <select class="form-select" id="priority" name="priority" required>
+                <option value="Low" selected>Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+            </select>
+        </div>
+        
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">send</span>Submit Request</button>
+            <a href="{{ url_for('maintenance_management_page') }}" class="btn btn-secondary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">cancel</span>Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block header %}
+  <h1><span class="material-icons-outlined me-2" style="vertical-align: text-bottom;">description</span>{% block title %}Request Custom Report{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    Specify Report Parameters
+  </div>
+  <div class="card-body">
+    <form method="post" action="{{ url_for('generate_custom_report') }}">
+      <div class="form-group mb-3">
+        <label class="form-label">Report Type:</label><br>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="report_type" id="weekly_report_radio" value="weekly" checked onchange="toggleDateInputs()">
+          <label class="form-check-label" for="weekly_report_radio">Weekly</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="report_type" id="monthly_report_radio" value="monthly" onchange="toggleDateInputs()">
+          <label class="form-check-label" for="monthly_report_radio">Monthly</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="report_type" id="daily_report_radio" value="daily" onchange="toggleDateInputs()">
+          <label class="form-check-label" for="daily_report_radio">Daily</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="radio" name="report_type" id="yearly_report_radio" value="yearly" onchange="toggleDateInputs()">
+          <label class="form-check-label" for="yearly_report_radio">Yearly</label>
+        </div>
+      </div>
+
+      <div class="form-group mb-3" id="weekly_date_input_div">
+        <label for="selected_date_weekly" class="form-label">Select any day within the desired week:</label>
+        <input type="date" class="form-control" id="selected_date_weekly" name="selected_date_weekly" required>
+      </div>
+
+      <div class="form-group mb-3" id="monthly_date_input_div" style="display:none;">
+        <label for="selected_month_monthly" class="form-label">Select Month and Year:</label>
+        <input type="month" class="form-control" id="selected_month_monthly" name="selected_month_monthly">
+      </div>
+
+      <div class="form-group mb-3" id="daily_date_input_div" style="display:none;">
+        <label for="selected_date_daily" class="form-label">Select Date:</label>
+        <input type="date" class="form-control" id="selected_date_daily" name="selected_date_daily">
+      </div>
+
+      <div class="form-group mb-3" id="yearly_date_input_div" style="display:none;">
+        <label for="selected_year_yearly" class="form-label">Select Year:</label>
+        <input type="number" class="form-control" id="selected_year_yearly" name="selected_year_yearly" min="2000" max="2100" placeholder="YYYY">
+      </div>
+
+      <button type="submit" class="btn btn-primary mt-3"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">summarize</span> Generate Report</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleDateInputs() {
+    var weeklyRadio = document.getElementById('weekly_report_radio');
+    var monthlyRadio = document.getElementById('monthly_report_radio');
+    var dailyRadio = document.getElementById('daily_report_radio');
+    var yearlyRadio = document.getElementById('yearly_report_radio');
+
+    var weeklyInputDiv = document.getElementById('weekly_date_input_div');
+    var monthlyInputDiv = document.getElementById('monthly_date_input_div');
+    var dailyInputDiv = document.getElementById('daily_date_input_div');
+    var yearlyInputDiv = document.getElementById('yearly_date_input_div');
+
+    var weeklyInput = document.getElementById('selected_date_weekly');
+    var monthlyInput = document.getElementById('selected_month_monthly');
+    var dailyInput = document.getElementById('selected_date_daily');
+    var yearlyInput = document.getElementById('selected_year_yearly');
+
+    // Hide all and reset required attributes
+    weeklyInputDiv.style.display = 'none';
+    monthlyInputDiv.style.display = 'none';
+    dailyInputDiv.style.display = 'none';
+    yearlyInputDiv.style.display = 'none';
+
+    weeklyInput.required = false;
+    monthlyInput.required = false;
+    dailyInput.required = false;
+    yearlyInput.required = false;
+
+    if (weeklyRadio.checked) {
+      weeklyInputDiv.style.display = 'block';
+      weeklyInput.required = true;
+    } else if (monthlyRadio.checked) {
+      monthlyInputDiv.style.display = 'block';
+      monthlyInput.required = true;
+    } else if (dailyRadio.checked) {
+      dailyInputDiv.style.display = 'block';
+      dailyInput.required = true;
+    } else if (yearlyRadio.checked) {
+      yearlyInputDiv.style.display = 'block';
+      yearlyInput.required = true;
+    }
+  }
+
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    toggleDateInputs();
+    // Set default values
+    var today = new Date();
+    var todayString = today.toISOString().split('T')[0];
+    
+    document.getElementById('selected_date_weekly').value = todayString;
+    document.getElementById('selected_date_daily').value = todayString;
+    
+    var currentYear = today.getFullYear();
+    var currentMonth = ('0' + (today.getMonth() + 1)).slice(-2);
+    document.getElementById('selected_month_monthly').value = currentYear + '-' + currentMonth;
+    document.getElementById('selected_year_yearly').value = currentYear;
+  });
+</script>
+{% endblock %}

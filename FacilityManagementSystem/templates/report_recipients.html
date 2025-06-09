@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Report Recipients{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h2><span class="material-icons-outlined me-2" style="vertical-align: text-bottom;">group</span>Manage Weekly Report Recipients</h2>
+            <p class="lead">Add or remove email addresses that will receive the automated weekly report.</p>
+        </div>
+    </div>
+
+    <!-- Add Recipient Form -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Add New Recipient</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('manage_report_recipients_page') }}">
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <label for="email_to_add" class="col-form-label">Email Address:</label>
+                    </div>
+                    <div class="col-md-5">
+                        <input type="email" id="email_to_add" name="email_to_add" class="form-control" required>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">add_circle_outline</span> Add Recipient
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Recipients List -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Current Recipients</h5>
+        </div>
+        <div class="card-body">
+            {% if recipients %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Email Address</th>
+                                <th>Added At</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for recipient in recipients %}
+                                <tr>
+                                    <td>{{ recipient.email }}</td>
+                                    <td>{{ recipient.added_at_formatted }}</td>
+                                    <td class="text-end">
+                                        <form method="POST" action="{{ url_for('delete_report_recipient', recipient_id=recipient.id) }}" onsubmit="return confirm('Are you sure you want to delete this recipient?');" style="display: inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">delete_outline</span> Delete
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No recipients have been added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">arrow_back</span>Back to Dashboard</a>
+    </div>
+
+</div>
+{% endblock %}

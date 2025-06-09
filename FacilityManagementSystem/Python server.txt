@@ -1,0 +1,10 @@
+cd c:\Users\Angel - PC\Documents\FacilityManagementSystem
+
+python app.py
+
+git init
+git add .
+git commit -m "Initial commit for Render deployment"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/facility-management-system.git
+git push -u origin main

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}{{ report_title | default('Activity Report') }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-12">
+            <h2><span class="material-icons-outlined me-2" style="vertical-align: text-bottom;">article</span>{{ report_title | default('Activity Report') }}</h2>
+            {% if start_date and end_date %}
+            <p class="lead">Period: <strong>{{ start_date.strftime('%B %d, %Y') }}</strong> to <strong>{{ end_date.strftime('%B %d, %Y') }}</strong></p>
+            {% elif selected_date %}
+            <p class="lead">Date: <strong>{{ selected_date.strftime('%B %d, %Y') }}</strong></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Expenditures Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><span class="material-icons-outlined me-2" style="vertical-align: text-bottom;">payments</span>Expenditures</h5>
+        </div>
+        <div class="card-body">
+            {% if expenditures %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th class="text-end">Amount</th>
+                                <th>Vendor</th>
+                                <th>Facility</th>
+                                <th>Buyer</th>
+                                <th>Means of Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exp in expenditures %}
+                                <tr>
+                                    <td>{{ exp.expenditure_date }}</td>
+                                    <td>{{ exp.category }}</td>
+                                    <td>{{ exp.description }}</td>
+                                    <td class="text-end">${{ "%.2f"|format(exp.amount) }}</td>
+                                    <td>{{ exp.vendor | default('N/A') }}</td>
+                                    <td>{{ exp.facility_name | default('N/A') }}</td>
+                                    <td>{{ exp.buyer | default('N/A') }}</td>
+                                    <td>{{ exp.means_of_payment | default('N/A') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No expenditures recorded for this week.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Maintenance Requests Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><span class="material-icons-outlined me-2" style="vertical-align: text-bottom;">build</span>Maintenance Requests (Reported this week)</h5>
+        </div>
+        <div class="card-body">
+            {% if maintenance_requests %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Reported At</th>
+                                <th>Facility</th>
+                                <th>Description</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for req in maintenance_requests %}
+                                <tr>
+                                    <td>{{ req.reported_at | default('N/A') }}</td>
+                                    <td>{{ req.facility_name | default('N/A') }}</td>
+                                    <td>{{ req.description }}</td>
+                                    <td>{{ req.priority }}</td>
+                                    <td>{{ req.status }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No new maintenance requests reported this week.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Cleaning Logs Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><span class="material-icons-outlined me-2" style="vertical-align: text-bottom;">cleaning_services</span>Cleaning Log Entries (Completed this week)</h5>
+        </div>
+        <div class="card-body">
+            {% if cleaning_logs %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Completed At</th>
+                                <th>Area</th>
+                                <th>Task</th>
+                                <th>Status</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in cleaning_logs %}
+                                <tr>
+                                    <td>{{ log.completed_at | default('N/A') }}</td>
+                                    <td>{{ log.area_name | default('N/A') }}</td>
+                                    <td>{{ log.task_description | default('N/A') }}</td>
+                                    <td>{{ log.status }}</td>
+                                    <td>{{ log.notes | default('N/A') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No cleaning activities logged as completed this week.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-4 mb-4">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">arrow_back</span>Back to Dashboard</a>
+    </div>
+
+</div>
+{% endblock %}

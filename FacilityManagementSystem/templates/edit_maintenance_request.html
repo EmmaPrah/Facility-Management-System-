@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Maintenance Request{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-3">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Edit Maintenance Request</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <div class="mb-3">
+                            <label for="facility" class="form-label">Facility</label>
+                            <input type="text" class="form-control" id="facility" name="facility" value="{{ request.facility_name }}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label for="issue_description" class="form-label">Issue Description</label>
+                            <textarea class="form-control" id="issue_description" name="issue_description" rows="3" required>{{ request.issue_description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="High" {% if request.priority == 'High' %}selected{% endif %}>High</option>
+                                <option value="Medium" {% if request.priority == 'Medium' %}selected{% endif %}>Medium</option>
+                                <option value="Low" {% if request.priority == 'Low' %}selected{% endif %}>Low</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="Pending" {% if request.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                <option value="In Progress" {% if request.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+                                <option value="Completed" {% if request.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                <option value="Cancelled" {% if request.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('maintenance_management_page') }}" class="btn btn-secondary">
+                                <span class="material-icons-sharp align-middle me-1">arrow_back</span> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-icons-sharp align-middle me-1">save</span> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

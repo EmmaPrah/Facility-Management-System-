@@ -1,0 +1,309 @@
+:root {
+    --primary-color: #004d99;  /* Dark blue */
+    --secondary-color: #ff0000;  /* Red */
+    --accent-color: #000000;  /* Black */
+    --background-color: #f8f9fa;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--accent-color);
+}
+
+.navbar {
+    background-color: var(--primary-color) !important;
+}
+
+.navbar-brand {
+    color: var(--secondary-color) !important;
+    font-weight: bold;
+}
+
+.nav-link {
+    color: white !important;
+}
+
+.nav-link:hover {
+    color: var(--secondary-color) !important;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar.navbar-dark .navbar-nav .nav-item > .nav-link.active {
+    color: white !important;
+    /* background-color removed to use Bootstrap default on navbar-dark */
+    font-weight: bold;
+    border-radius: 0.25rem; /* Retaining for consistency if desired, can be removed */
+}
+
+.btn {
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-success:hover {
+    filter: brightness(90%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-danger:hover {
+    filter: brightness(90%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-warning:hover {
+    filter: brightness(90%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.btn-info:hover {
+    filter: brightness(90%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #003c7a; /* Darker shade of primary blue */
+    border-color: #003366;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.status-available {
+    color: #28a745;
+}
+
+.status-occupied {
+    color: #dc3545;
+}
+
+.status-maintenance {
+    color: #ffc107;
+}
+
+/* Dashboard cards */
+.dashboard-card {
+    transition: transform 0.2s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+}
+
+.dashboard-card .card-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.dashboard-card .card-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.dashboard-card .card-text.small {
+    font-size: 0.85rem;
+    font-weight: normal;
+}
+
+/* Dashboard Statistic Card Modern Look */
+.statistic-card {
+    border-radius: 1rem;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.09);
+    transition: transform 0.22s cubic-bezier(.24,1.07,.62,.98), box-shadow 0.22s;
+    background: #fff;
+    opacity: 1;
+    transform: none;
+}
+.statistic-card:hover {
+    transform: translateY(-6px) scale(1.025);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+    z-index: 2;
+}
+
+/* Dashboard Icon Circles */
+.icon-circle {
+    vertical-align: middle;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-right: 0.5rem;
+}
+.icon-circle-lg {
+    vertical-align: middle;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 3.5rem;
+    height: 3.5rem;
+    font-size: 2rem;
+}
+
+/* Dashboard Card Enhancements */
+.dashboard-card {
+    border-radius: 1.25rem;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    transition: transform 0.22s, box-shadow 0.22s;
+}
+.dashboard-card:hover {
+    transform: translateY(-8px) scale(1.01);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.16);
+}
+
+.dashboard-card .card-header {
+    border-top-left-radius: 1.25rem;
+    border-top-right-radius: 1.25rem;
+    background: #f7faff;
+    border-bottom: none;
+}
+
+/* Quick Actions Modernization */
+.quick-action-link {
+    transition: background 0.18s, box-shadow 0.18s, transform 0.18s;
+    border-radius: 0.75rem !important;
+    margin-bottom: 0.4rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.quick-action-link:hover, .quick-action-link:focus {
+    background: #f0f9ff !important;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.10);
+    transform: translateY(-2px) scale(1.01);
+    text-decoration: none;
+}
+
+/* Quick Action Animation */
+.quick-action-animated {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUpQuick 0.7s cubic-bezier(.24,1.07,.62,.98) forwards;
+}
+
+@keyframes fadeInUpQuick {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* Dashboard spacing and alignment tweaks */
+.dashboard-card .card-title {
+    font-size: 1.13rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.dashboard-card .card-header {
+    display: flex;
+    align-items: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    gap: 0.5rem;
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.dashboard-card .card-title span, .quick-action-link span {
+    margin-right: 0.5rem;
+}
+
+
+/* Table Row Hover Effect */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05); /* A light blue, adjust as needed */
+    cursor: pointer; /* Optional: change cursor to indicate interactivity */
+}
+
+/* Ensure specific table rows also get hover if needed, e.g., facility-row */
+.facility-row:hover,
+.maintenance-request-row:hover {
+    background-color: rgba(0, 123, 255, 0.075); /* Slightly more pronounced for specific rows if desired */
+}
+
+/* Facility cards */
+.facility-card {
+    border-left: 4px solid var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.facility-card .card-header,
+.maintenance-request-card .card-header {
+    background-color: #f8f9fa; /* Light background for card headers */
+}
+
+.facility-card .card-body {
+    padding: 1.25rem;
+}
+
+/* Key Features Section Animation on index.html */
+.feature-card-animation {
+    opacity: 0;
+    transform: translateY(30px); /* Start slightly lower */
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: 0.3s; /* Delay slightly after page load */
+    box-shadow: 0 6px 32px rgba(0,0,0,0.16);
+    padding: 2.5rem 2rem 2rem 2rem;
+    background: #fafdff;
+    border-radius: 1.25rem;
+    min-height: 220px;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fallback for browsers that do not support animation */
+@media (prefers-reduced-motion: reduce) {
+    .feature-card-animation {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+    }
+}
+
+.feature-card-animation {
+    /* Fallback if animation fails */
+    opacity: 1;
+}
+
+.feature-item {
+    transition: transform 0.3s cubic-bezier(.24,1.07,.62,.98), box-shadow 0.3s cubic-bezier(.24,1.07,.62,.98);
+    padding: 32px 16px 24px 16px;
+    border-radius: 0.5rem;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+}
+
+.feature-item:hover {
+    transform: scale(1.07);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.18);
+    background: #f0f8ff;
+}

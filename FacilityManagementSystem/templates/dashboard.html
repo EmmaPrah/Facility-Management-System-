@@ -1,0 +1,513 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- Error Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<!-- Dashboard Overview -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="mb-3">Facility Dashboard</h2>
+        <div class="card dashboard-card fade">
+            <div class="card-body">
+                <div class="row">
+                    <!-- Total Facilities -->
+                    <div class="col-md-3 statistic-card fade">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0 d-flex align-items-center gap-2"><span class="material-icons-sharp icon-circle-lg" style="background: #0d6efd; color: #fff;"></span> Total Facilities</h5>
+                            </div>
+                            <div class="card-body">
+                                <h2 class="card-text mb-2">{{ facilities|length if facilities else 0 }}</h2>
+<div class="progress">
+  <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 100%"></div>
+</div>
+                                <p class="card-text small">Total number of facilities managed</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Operational Facilities -->
+                    <div class="col-md-3 statistic-card fade">
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0 d-flex align-items-center gap-2"><span class="material-icons-sharp icon-circle-lg" style="background: #198754; color: #fff;">check_circle_outline</span> Operational</h5>
+                            </div>
+                            <div class="card-body">
+                                <h2 class="card-text mb-2">{{ facilities|selectattr('status', 'equalto', 'Available')|list|length if facilities else 0 }}</h2>
+<div class="progress">
+  <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 100%"></div>
+</div>
+                                <p class="card-text small">Facilities ready for use</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Occupied Facilities -->
+                    <div class="col-md-3 statistic-card fade">
+                        <div class="card mb-3">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="card-title mb-0 d-flex align-items-center gap-2"><span class="material-icons-sharp icon-circle-lg" style="background: #dc3545; color: #fff;">lock_outline</span> Occupied</h5>
+                            </div>
+                            <div class="card-body">
+                                <h2 class="card-text mb-2">{{ facilities|selectattr('status', 'equalto', 'Occupied')|list|length if facilities else 0 }}</h2>
+<div class="progress">
+  <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 100%"></div>
+</div>
+                                <p class="card-text small">Currently in use</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Active Maintenance -->
+                    <div class="col-md-3 statistic-card fade">
+                        <div class="card mb-3">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="card-title mb-0 d-flex align-items-center gap-2"><span class="material-icons-sharp icon-circle-lg" style="background: #ffc107; color: #212529;">build</span> Active Maintenance</h5>
+                            </div>
+                            <div class="card-body">
+                                <h2 class="card-text mb-2">{{ facilities|selectattr('status', 'equalto', 'Maintenance')|list|length if facilities else 0 }}</h2>
+<div class="progress">
+  <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" style="width: 100%"></div>
+</div>
+                                <p class="card-text small">Facilities requiring maintenance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Navigation -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="mb-0"><span class="material-icons-sharp align-middle me-1">explore</span> Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a href="{{ url_for('cleaning_checklist_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link">
+                        <span class="material-icons-sharp icon-circle" style="background: #0dcaf0; color: #fff;">checklist</span> Cleaning Checklist
+                    </a>
+                    <a href="{{ url_for('maintenance_management_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link">
+                        <span class="material-icons-sharp icon-circle" style="background: #ffc107; color: #212529;">build_circle</span> Manage Maintenance
+                    </a>
+                    <a href="{{ url_for('manage_facilities_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link">
+                        <span class="material-icons-sharp icon-circle" style="background: #0d6efd; color: #fff;">business</span> Manage Facilities
+                    </a>
+                    <a href="{{ url_for('expenditures_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link">
+                        <span class="material-icons-sharp icon-circle" style="background: #6610f2; color: #fff;">account_balance_wallet</span> Expenditures
+                    </a>
+                    <a href="{{ url_for('weekly_report_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link quick-action-animated" style="animation-delay: 0.1s;">
+                        <span class="material-icons-sharp icon-circle" style="background: #fd7e14; color: #fff;">summarize</span> Weekly Report
+                    </a>
+                    <a href="{{ url_for('manual_report_request_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link quick-action-animated" style="animation-delay: 0.2s;">
+                        <span class="material-icons-sharp icon-circle" style="background: #00b894; color: #fff;">description</span> Request Report
+                    </a>
+                    <a href="{{ url_for('archived_reports_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link quick-action-animated" style="animation-delay: 0.3s;">
+                        <span class="material-icons-sharp icon-circle" style="background: #6c757d; color: #fff;">archive</span> Archived Reports
+                    </a>
+                    <a href="{{ url_for('manage_report_recipients_page') }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 quick-action-link quick-action-animated" style="animation-delay: 0.4s;">
+                        <span class="material-icons-sharp icon-circle" style="background: #20c997; color: #fff;">group_add</span> Manage Recipients
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Recent Activities</h5>
+                    <a href="#" class="btn btn-outline-primary btn-sm" onclick="viewAllActivities(); return false;">
+                        View All <span class="material-icons-sharp align-middle ms-1" style="font-size: 1.1em;">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    {% if facilities and facilities|length > 0 %}
+                        {% for facility in facilities[:5] %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+    {% if facility.status == 'Available' %}
+        <span class="material-icons-sharp align-middle me-1" style="color: #198754; font-size: 1.2em; vertical-align: middle;">check_circle</span>
+    {% elif facility.status == 'Occupied' %}
+        <span class="material-icons-sharp align-middle me-1" style="color: #dc3545; font-size: 1.2em; vertical-align: middle;">lock</span>
+    {% elif facility.status == 'Maintenance' %}
+        <span class="material-icons-sharp align-middle me-1" style="color: #ffc107; font-size: 1.2em; vertical-align: middle;">build</span>
+    {% else %}
+        <span class="material-icons-sharp align-middle me-1" style="color: #6c757d; font-size: 1.2em; vertical-align: middle;">help_outline</span>
+    {% endif %}
+    {{ facility.name }}
+</h6>
+                                <small>{{ facility.created_at }}</small>
+                            </div>
+                            <p class="mb-1">{{ facility.description }}</p>
+                            <small>Status: 
+                                <span class="badge 
+                                    {% if facility.status == 'Available' %}bg-success
+                                    {% elif facility.status == 'Occupied' %}bg-danger
+                                    {% elif facility.status == 'Maintenance' %}bg-warning text-dark
+                                    {% else %}bg-secondary
+                                    {% endif %}">
+                                    {{ facility.status }}
+                                </span>
+                            </small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="list-group-item text-center">
+                            <p class="mb-0">No recent activities to display.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add Maintenance Request Modal -->
+<div class="modal fade" id="addMaintenanceRequestModal" tabindex="-1" aria-labelledby="addMaintenanceRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMaintenanceRequestModalLabel">Add New Maintenance Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addMaintenanceRequestForm">
+                    <div class="mb-3">
+                        <label for="maintenanceFacilityId" class="form-label">Facility</label>
+                        <select class="form-select" id="maintenanceFacilityId" name="facility_id" required>
+                            <option value="" selected disabled>Select Facility</option>
+                            {% for facility in facilities %}
+                                <option value="{{ facility.id }}">{{ facility.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenanceIssueDescription" class="form-label">Issue Description</label>
+                        <textarea class="form-control" id="maintenanceIssueDescription" name="issue_description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="maintenancePriority" class="form-label">Priority</label>
+                        <select class="form-select" id="maintenancePriority" name="priority" required>
+                            <option value="Low" selected>Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Facility Modal (No longer directly used by button, but kept for potential future use or reference) -->
+<div class="modal fade" id="addFacilityModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Facility</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addFacilityForm">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status" required>
+                            <option value="Available">Available</option>
+                            <option value="Occupied">Occupied</option>
+                            <option value="Maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Capacity</label>
+                        <input type="number" class="form-control" name="capacity" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Equipment</label>
+                        <textarea class="form-control" name="equipment" rows="2" placeholder="List equipment available"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitForm('addFacilityForm')">Add Facility</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Facility Modal -->
+{% for facility in facilities %}
+<div class="modal fade" id="editFacilityModal{{ facility.id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Facility</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editFacilityForm{{ facility.id }}">
+                    <input type="hidden" name="id" value="{{ facility.id }}">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" value="{{ facility.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3">{{ facility.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status" required>
+                            <option value="Available" {% if facility.status == 'Available' %}selected{% endif %}>Available</option>
+                            <option value="Occupied" {% if facility.status == 'Occupied' %}selected{% endif %}>Occupied</option>
+                            <option value="Maintenance" {% if facility.status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Capacity</label>
+                        <input type="number" class="form-control" name="capacity" value="{{ facility.capacity if facility.capacity else 1 }}" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Equipment</label>
+                        <textarea class="form-control" name="equipment" rows="2" placeholder="List equipment available">{{ facility.equipment if facility.equipment else '' }}</textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitForm('editFacilityForm{{ facility.id }}')">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Maintenance Requests -->
+<div class="modal fade" id="maintenanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Maintenance Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="maintenanceForm">
+                    <div class="mb-3">
+                        <label class="form-label">Facility</label>
+                        <select class="form-select" name="facility_id" required>
+                            {% for facility in facilities %}
+                            <option value="{{ facility.id }}">{{ facility.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Issue Description</label>
+                        <textarea class="form-control" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" name="priority" required>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="submitMaintenanceRequest()">Submit Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Filter facilities by status
+    function filterStatus(status) {
+        const rows = document.querySelectorAll('.facility-row');
+        rows.forEach(row => {
+            if (status === 'All' || row.dataset.status === status) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Add event listeners for status filters
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.status-filter').forEach(button => {
+            button.addEventListener('click', function() {
+                const status = this.dataset.status;
+                filterStatus(status);
+                // Remove active class from all buttons
+                document.querySelectorAll('.status-filter').forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+            });
+        });
+    });
+
+    // Submit maintenance request
+    function submitMaintenanceRequest() {
+        const form = document.getElementById('maintenanceForm');
+        const formData = new FormData(form);
+        
+        fetch('/api/maintenance', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(Object.fromEntries(formData))
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Maintenance request submitted successfully');
+                form.reset();
+                const modal = bootstrap.Modal.getInstance(document.getElementById('maintenanceModal'));
+                modal.hide();
+            } else {
+                alert(data.message || 'An error occurred');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while processing your request');
+        });
+    }
+
+    // View all activities
+    function viewAllActivities() {
+        // This would typically make an API call to get all activities
+        // For now, we'll just show an alert
+        alert('Viewing all activities is not yet implemented');
+    }
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addMaintenanceRequestForm = document.getElementById('addMaintenanceRequestForm');
+    const addMaintenanceRequestModalElement = document.getElementById('addMaintenanceRequestModal');
+    let addMaintenanceRequestModal;
+    if (addMaintenanceRequestModalElement) {
+        addMaintenanceRequestModal = new bootstrap.Modal(addMaintenanceRequestModalElement);
+    }
+
+    if (addMaintenanceRequestForm && addMaintenanceRequestModal) {
+        addMaintenanceRequestForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(addMaintenanceRequestForm);
+            const data = {
+                facility_id: formData.get('facility_id'),
+                issue_description: formData.get('issue_description'),
+                priority: formData.get('priority')
+            };
+
+            if (!data.facility_id) {
+                alert('Please select a facility.');
+                return;
+            }
+
+            fetch('/api/maintenance_requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    addMaintenanceRequestModal.hide();
+                    alert(result.message || 'Maintenance request submitted successfully!');
+                    window.location.reload(); 
+                } else {
+                    alert('Error: ' + (result.message || 'Could not submit maintenance request.'));
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting maintenance request:', error);
+                alert('An unexpected error occurred. Please try again.');
+            });
+        });
+    }
+
+    // Ensure filterStatus is defined (if not already in main.js)
+    if (typeof window.filterStatus !== 'function') {
+        window.filterStatus = function(status) {
+            const table = document.getElementById('facilitiesTable');
+            if (!table) return;
+            const rows = table.getElementsByTagName('tr');
+            for (let i = 1; i < rows.length; i++) { // Start from 1 to skip header row
+                const statusCell = rows[i].getElementsByTagName('td')[2]; // Assuming status is the 3rd column
+                if (statusCell) {
+                    if (status === 'All' || statusCell.textContent.includes(status)) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        };
+    }
+
+    // Placeholder for viewAllActivities if you want to implement it here
+    if (typeof window.viewAllActivities !== 'function') {
+        window.viewAllActivities = function() {
+            alert('View All Activities functionality to be implemented.');
+            // Example: window.location.href = '/all-activities';
+        };
+    }
+});
+</script>
+<script>
+window.addEventListener('DOMContentLoaded', function() {
+    var cards = document.querySelectorAll('.statistic-card.fade');
+    cards.forEach(function(card, i) {
+        setTimeout(function() {
+            card.classList.add('show');
+        }, 200 + i * 150);
+    });
+    var dash = document.querySelector('.dashboard-card.fade');
+    if (dash) setTimeout(function() { dash.classList.add('show'); }, 100);
+});
+</script>
+{% endblock %}

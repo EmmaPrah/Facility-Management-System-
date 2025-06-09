@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Expenditures{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <h2>Expenditure Management</h2>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ url_for('add_expenditure_page') }}" class="btn btn-success d-flex align-items-center gap-2">
+    <span class="material-icons-sharp icon-circle" style="background: #198754; color: #fff;">add_circle</span>
+    Add New
+</a>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-header">
+            Expenditure List
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Vendor</th>
+                        <th>Facility</th>
+                        <th class="text-center"><span class="material-icons-sharp icon-circle" style="background: #6c757d; color: #fff;">more_horiz</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if expenditures %}
+                        {% for expenditure in expenditures %}
+                            <tr>
+                                <td>{{ expenditure.expenditure_date }}</td>
+                                <td>{{ expenditure.category }}</td>
+                                <td>{{ expenditure.description }}</td>
+                                <td>${{ "%.2f"|format(expenditure.amount) }}</td>
+                                <td>{{ expenditure.vendor if expenditure.vendor else 'N/A' }}</td>
+                                <td>{{ expenditure.facility_name if expenditure.facility_name else 'N/A' }}</td>
+                                <td>
+                                    <a href="{{ url_for('edit_expenditure_page', expenditure_id=expenditure.id) }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2 me-1" title="Edit" aria-label="Edit"><span class="material-icons-sharp icon-circle" style="background: #0d6efd; color: #fff;">edit</span></a>
+                                    <a href="{{ url_for('generate_receipt', expenditure_id=expenditure.id) }}" class="btn btn-sm btn-outline-info d-flex align-items-center gap-2 me-1" title="View Receipt" aria-label="View Receipt"><span class="material-icons-sharp icon-circle" style="background: #0dcaf0; color: #fff;">receipt_long</span></a>
+                                    <button class="btn btn-sm btn-outline-danger d-flex align-items-center gap-2" title="Delete" aria-label="Delete">
+    <span class="material-icons-sharp icon-circle" style="background: #dc3545; color: #fff;">delete</span>
+</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center">No expenditures recorded yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

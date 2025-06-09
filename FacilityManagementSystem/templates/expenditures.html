@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+
+{% block title %}Expenditure Management - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="page-title mb-4"><span class="material-icons-outlined me-2" style="vertical-align: text-bottom;">account_balance_wallet</span>Expenditure Management</h2>
+        </div>
+    </div>
+
+    <!-- Add Expenditure Form Card -->
+    <div class="card mb-4 animated fadeInUp">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Add New Expenditure</h5>
+        </div>
+        <div class="card-body">
+            <form id="addExpenditureForm">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="expenditure_date" class="form-label">Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="expenditure_date" name="expenditure_date" required>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="" selected disabled>Select category...</option>
+                            <option value="Electricity Credit">Electricity Credit</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Petrol">Petrol</option>
+                            <option value="Generator Repair">Generator Repair</option>
+                            <option value="AC Repair">AC Repair</option>
+                            <option value="Cleaning Supplies">Cleaning Supplies</option>
+                            <option value="Office Consumables">Office Consumables</option>
+                            <option value="Maintenance">General Maintenance</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="amount" class="form-label">Amount (GH₵) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" class="form-control" id="amount" name="amount" placeholder="0.00" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="description" class="form-label">Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="description" name="description" rows="2" placeholder="Detailed description of the expense" required></textarea>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="vendor" class="form-label">Vendor</label>
+                        <input type="text" class="form-control" id="vendor" name="vendor" placeholder="e.g., ECG, Shell, Local Mechanic">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="facility_id" class="form-label">Facility (Optional)</label>
+                        <select class="form-select" id="facility_id" name="facility_id">
+                            <option value="" selected>None</option>
+                            {% for facility in facilities %}
+                                <option value="{{ facility.id }}">{{ facility.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="receipt_reference" class="form-label">Receipt/Invoice #</label>
+                        <input type="text" class="form-control" id="receipt_reference" name="receipt_reference" placeholder="e.g., INV-12345">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="Any additional notes or comments"></textarea>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success"><span class="material-icons-outlined me-1" style="vertical-align: text-bottom;">add_circle_outline</span> Add Expenditure</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Expenditures Table Card -->
+    <div class="card animated fadeInUp delay-1s">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Expenditure Log</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Amount (GH₵)</th>
+                            <th>Vendor</th>
+                            <th>Facility</th>
+                            <th>Receipt #</th>
+                            <th>Notes</th>
+                            <th>Logged At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expendituresTableBody">
+                        {% if expenditures %}
+                            {% for exp in expenditures %}
+                                <tr>
+                                    <td>{{ exp.expenditure_date }}</td>
+                                    <td>{{ exp.category }}</td>
+                                    <td>{{ exp.description }}</td>
+                                    <td class="text-end">{{ "%.2f"|format(exp.amount) }}</td>
+                                    <td>{{ exp.vendor if exp.vendor else '-' }}</td>
+                                    <td>{{ exp.facility_name if exp.facility_name else '-' }}</td>
+                                    <td>{{ exp.receipt_reference if exp.receipt_reference else '-' }}</td>
+                                    <td>{{ exp.notes if exp.notes else '-' }}</td>
+                                    <td>{{ exp.created_at.split('.')[0] if exp.created_at else '-'}}</td> {# Display without microseconds #}
+                                    <td>
+                                        <a href="{{ url_for('generate_receipt', expenditure_id=exp.id) }}" class="btn btn-sm btn-outline-primary" title="View Receipt">
+                                            <span class="material-icons-outlined me-1" style="font-size: 1.1em; vertical-align: text-bottom;">receipt_long</span> Receipt
+                                        </a>
+                                        <a href="{{ url_for('edit_expenditure_page', expenditure_id=exp.id) }}" class="btn btn-sm btn-outline-secondary ms-1" title="Edit Expenditure">
+                                            <span class="material-icons-outlined me-1" style="font-size: 1.1em; vertical-align: text-bottom;">edit</span> Edit
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" class="text-center">No expenditures recorded yet.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addExpenditureForm = document.getElementById('addExpenditureForm');
+
+        addExpenditureForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(addExpenditureForm);
+            const data = {};
+            formData.forEach((value, key) => {
+                // Handle empty facility_id - send null or omit
+                if (key === 'facility_id' && value === '') {
+                    data[key] = null; 
+                } else {
+                    data[key] = value;
+                }
+            });
+
+            // Basic client-side validation for amount to ensure it's positive
+            if (parseFloat(data.amount) <= 0) {
+                alert('Amount must be a positive value.');
+                return;
+            }
+
+            fetch('/api/expenditures', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Expenditure added successfully!'); // Replace with a nicer notification later
+                    addExpenditureForm.reset();
+                    // Optionally, refresh the table or add the new row dynamically
+                    location.reload(); // Simple way to refresh data
+                } else {
+                    alert('Error adding expenditure: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An unexpected error occurred. Please try again.');
+            });
+        });
+    });
+</script>
+{% endblock %}

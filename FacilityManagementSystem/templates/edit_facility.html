@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Facility{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Edit Facility</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        <input type="hidden" name="id" value="{{ facility.id }}">
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" class="form-control" name="name" value="{{ facility.name }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3" required>{{ facility.description }}</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status" required>
+                                <option value="Available" {% if facility.status == 'Available' %}selected{% endif %}>Available</option>
+                                <option value="Occupied" {% if facility.status == 'Occupied' %}selected{% endif %}>Occupied</option>
+                                <option value="Maintenance" {% if facility.status == 'Maintenance' %}selected{% endif %}>Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ url_for('manage_facilities_page') }}" class="btn btn-secondary me-2">
+                                <span class="material-icons-sharp me-1">cancel</span>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="material-icons-sharp me-1">save</span>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
